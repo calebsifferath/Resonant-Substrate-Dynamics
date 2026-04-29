@@ -1,28 +1,56 @@
-https://github.com/calebsifferath/Resonant-Substrate-Dynamics/blob/main/The%20Hyper-State%20Model_%20model%202.pdf
-Resonant Substrate Dynamics: The Hyper-state Framework
-**Author:** Caleb Sifferath  
-**Date:** April 27, 2026
-Overview
-This repository contains the numerical validation and core postulates for the **Hyper-state Model**, a non-linear scalar field framework for gravitational dynamics. The model proposes that spacetime acts as an active, energy-responsive substrate rather than a purely geometric vacuum.
+Computational study of multi-body gravitational dynamics using modified interaction models.
+Resonance Persistence Analysis
 
-Key Discoveries
-- **Dark Matter Alternative:** Demonstrates that external substrate pressure can provide the binding force necessary for galactic cohesion without requiring "invisible mass."
-- **Resonance Persistence Index (RPI):** Computationally proves that non-linear coupling ($\alpha \approx 0.66$) maximizes multi-body orbital stability.
-- **Relativistic Convergence:** Replicates complex "rosette" precession (as observed in the S2 star) using simplified scalar field dynamics.
+This project explores multi-body gravitational dynamics under modified interaction models. The goal is to evaluate whether nonlinear interaction scaling produces measurable differences in orbital stability and transient clustering behavior.
 
-## 📜 Core Postulates
-1. **P1 — Substrate Assumption:** Spacetime is a continuous, non-dissipative energy-responsive substrate.
-2. **P2 — Field Response:** Local energy density induces a scalar response field $\Phi_H = C \cdot (\rho_E)^\alpha$.
-3. **P3 — Motion Principle:** Particle acceleration is governed by spatial gradients in the response field.
-4. **P4 — Nonlinear Coupling:** Stability is non-monotonic and governed by the dimensionless parameter $\alpha$.
+Models Implemented
+Newtonian baseline — inverse-square gravitational interaction
+Relativistic-inspired modification — adjusted interaction scaling
+Hyper-state model — nonlinear energy-density-dependent interaction
 
-## 💻 Simulation Usage
-The included Python simulation compares **Newtonian**, **Einsteinian (GR)**, and **Hyper-state** dynamics side-by-side in high-energy galactic environments.
+All models are evaluated under identical initial conditions.
 
-### Requirements
-- Python 3.x
-- NumPy
-- Matplotlib
-```
- License
-This project is licensed under the **MIT License**—see the `LICENSE` file for details. Citation is required for use in academic or professional research.
+Metrics
+
+Loop Count
+A loop is defined as a complete oscillation in the y-coordinate, measured via zero-crossings.
+
+Capture Condition
+A body is considered captured if its final radial distance remains below a fixed threshold.
+
+Normalized Resonance Persistence Index (RPI)
+
+RPI=
+N⋅T
+total loops
+	​
+
+
+Where:
+
+N = number of bodies (excluding central mass)
+T = total simulation time
+
+This metric allows comparison across different models and simulation durations.
+
+Experimental Design
+
+Each simulation run:
+
+uses identical initial conditions across all models
+tracks particle trajectories over time
+evaluates capture, ejection, and orbital structure
+
+Outputs include:
+
+number of captured bodies
+number of ejected bodies
+total loop count
+normalized RPI
+Objective
+
+To determine whether modified interaction models produce:
+
+extended metastable clustering
+increased orbital persistence
+measurable deviations from classical gravitational behavior
