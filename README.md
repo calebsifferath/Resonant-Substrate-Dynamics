@@ -1,4 +1,5 @@
-# Resonant Substrate Dynamics: The Hyper-state Framework
+https://github.com/calebsifferath/Resonant-Substrate-Dynamics/blob/main/The%20Hyper-State%20Model_%20model%202.pdf
+Resonant Substrate Dynamics: The Hyper-state Framework
 **Author:** Caleb Sifferath  
 **Date:** April 27, 2026
 Overview
