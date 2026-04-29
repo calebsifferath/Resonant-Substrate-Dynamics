@@ -73,3 +73,73 @@ for ax, data, title in configs:
 
 plt.tight_layout()
 plt.show()
+# --- 4. THE RESONANCE REPORT (UPGRADED) ---
+print("\n" + "="*40)
+print("   SIFFERATH RESONANCE REPORT (NORMALIZED)")
+print("="*40)
+
+SIMULATION_TIME = steps * dt  # make sure steps and dt exist
+
+def analyze_capture(data_list, label):
+    total_loops = 0
+    ejected_count = 0
+    captured_count = 0
+
+    for star_path in data_list[1:]:  # Ignore central mass
+        p = np.array(star_path)
+
+        # --- Escape Condition ---
+        dist = np.linalg.norm(p[-1])
+        if dist > 250:
+            ejected_count += 1
+        else:
+            captured_count += 1
+
+        # --- Loop Counting (y-axis crossings) ---
+        crossings = np.where(np.diff(np.sign(p[:, 1])))[0]
+        loops = len(crossings) // 2
+        total_loops += loops
+
+    num_stars = len(data_list) - 1
+
+    # --- Normalized RPI ---
+    if num_stars > 0 and SIMULATION_TIME > 0:
+        rpi = total_loops / (num_stars * SIMULATION_TIME)
+    else:
+        rpi = 0
+
+    print(f"[{label}]")
+    print(f" - Stars Captured: {captured_count}/{num_stars}")
+    print(f" - Stars Ejected: {ejected_count}/{num_stars}")
+    print(f" - Total Loops: {total_loops}")
+    print(f" - Normalized RPI: {rpi:.5f}")
+    print("-" * 40)
+
+    return {
+        "captured": captured_count,
+        "ejected": ejected_count,
+        "loops": total_loops,
+        "rpi": rpi
+    }
+
+
+# --- RUN ANALYSIS ---
+n_results = analyze_capture(n_data, "NEWTON")
+e_results = analyze_capture(e_data, "EINSTEIN")
+h_results = analyze_capture(h_data, "HYPER-STATE")
+
+
+# --- DIRECT COMPARISON (THIS IS HUGE FOR REVIEWERS) ---
+print("\n" + "="*40)
+print("   MODEL COMPARISON")
+print("="*40)
+
+def compare_models(base, test, label):
+    print(f"{label} vs NEWTON:")
+    print(f" - ΔRPI: {test['rpi'] - base['rpi']:.5f}")
+    print(f" - ΔCaptured: {test['captured'] - base['captured']}")
+    print(f" - ΔEjected: {test['ejected'] - base['ejected']}")
+    print("-" * 40)
+
+compare_models(n_results, e_results, "EINSTEIN")
+compare_models(n_results, h_results, "HYPER-STATE")
