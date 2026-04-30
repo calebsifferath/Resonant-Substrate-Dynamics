@@ -1,0 +1,99 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# --- 1. GALACTIC SYSTEM SETUP ---
+masses = np.array([4.3, 14e-6, 10e-6, 10e-6])
+pos_init = np.array([[0.0, 0.0], [100.0, 0.0], [70.0, 50.0], [50.0, -30.0]])
+vel_init = np.array([[0.0, 0.0], [0.0, 15.0], [-10.0, 8.0], [12.0, 5.0]])
+
+alpha = 0.66
+rpi_mod = alpha**2.0 * np.exp(-3.0 * alpha)
+pressure_strength = 0.04 
+c_light = 63241.0
+G_const = 39.47 
+
+# --- THE TRUE MILLION YEAR MARATHON SETTINGS ---
+dt = 0.005
+steps = 200000000  # 1 Million Years
+energy_log = []     
+
+def get_total_energy(p, v, m, G):
+    ke = 0.5 * np.sum(m[:, np.newaxis] * np.linalg.norm(v, axis=1)**2)
+    pe = 0
+    for i in range(len(m)):
+        for j in range(i + 1, len(m)):
+            r = np.linalg.norm(p[i] - p[j])
+            if r < 0.1: r = 0.1 
+            pe -= G * m[i] * m[j] / r
+    return ke + pe
+
+def run_sim(mode):
+    p, v = pos_init.copy(), vel_init.copy()
+    history = [[] for _ in range(len(masses))]
+    
+    print(f"--- STARTING {mode} TRIAL BY FIRE ---")
+    
+    for i in range(steps):
+        for j in range(len(masses)):
+            if j == 0: continue
+            net_f = np.array([0.0, 0.0])
+            for k in range(len(masses)):
+                if j == k: continue
+                r_vec = p[k] - p[j]
+                dist = np.linalg.norm(r_vec)
+                if dist < 1.0: dist = 1.0
+                
+                accel = (G_const * masses[k]) / (dist**2)
+                
+                if mode == "Hyper":
+                    accel *= rpi_mod
+                    net_f += (pressure_strength * (p[k]-p[j]) / dist)
+                elif mode == "Einstein" and k == 0:
+                    L_vec = np.cross(np.append(p[j], 0), np.append(v[j], 0))
+                    L_sq = np.sum(L_vec**2)
+                    accel *= (1.0 + (3.0 * L_sq) / (dist**2 * c_light**2))
+                
+                net_f += accel * (r_vec / dist)
+            
+            v[j] += net_f * dt
+            p[j] += v[j] * dt
+
+        # --- THE BACKUP SYSTEM ---
+        # Record energy every 10,000 steps
+        if mode == "Hyper" and i % 10000 == 0:
+            e = get_total_energy(p, v, masses, G_const)
+            energy_log.append(e)
+            
+            # Save a physical backup to the hard drive every 500,000 steps
+            if i % 500000 == 0:
+                pd.DataFrame(energy_log, columns=['Energy']).to_csv('sifferath_BACKUP.csv', index=False)
+                print(f"Year {int(i*dt)} | Progress: {(i/steps)*100:.1f}% | Backup Saved.")
+
+        # Record visual path (only every 10,000 steps to save RAM)
+        if i % 10000 == 0:
+            for j in range(len(masses)):
+                history[j].append(p[j].copy())
+                
+    return history
+
+# EXECUTE
+h_data = run_sim("Hyper")
+
+# --- FINAL PERMANENT SAVE (No Indent) ---
+print("Sim complete. Saving Final Data...")
+df_final = pd.DataFrame(energy_log, columns=['Energy'])
+df_final.to_csv('sifferath_million_year_energy.csv', index=False)
+print("SUCCESS: 1,000,000 Year Energy Log Created.")
+
+# FINAL GRAPH
+plt.figure(figsize=(10, 10))
+for i in range(1, 4):
+    path = np.array(h_data[i])
+    plt.plot(path[:,0], path[:,1], alpha=0.5, label=f'Star {i}')
+plt.plot(0, 0, 'ko', markersize=15, label='Sgr A*')
+plt.title("SIFFERATH (2026) - 1,000,000 YEAR STRESS TEST")
+plt.xlim(-10000, 10000); plt.ylim(-10000, 10000)
+plt.grid(True, alpha=0.2)
+plt.legend()
+plt.show()
